@@ -1,0 +1,9 @@
+.DS_Store
+*.swp
+*.bck
+fp-info-cache
+*-cache.lib
+*.hex
+*.lst
+*.bin
+*.srec

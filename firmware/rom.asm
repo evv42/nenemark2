@@ -13,7 +13,9 @@ SCRADRL= NENETOP-5
 STRADRL= $02
 STRADRH= $03
 
-  .org $8000
+  .org $8000; fill the 32KiB rom space
+  
+  .org $F800; will try to use 2048 bytes for all firmware, so that chips down to 2716s can be used
 
 nmi:
   rti
@@ -26,7 +28,7 @@ reset:
   sei
   cld
   
-  jsr pause;wait for voltages to be a bit more stable
+  jsr pause;wait for stuff to be a bit more stable, helps with breadboards
   jsr pause
   jsr pause
   
@@ -130,13 +132,13 @@ boot_menu:
   
   cmp #'n'
   beq start_nenemon
-  cmp #'i'
-  beq start_ipl
+  cmp #'e'
+  beq start_e
   jsr beep
   jmp .invalid
   
-start_ipl:  
-  outstr msg_ipl
+start_e:  
+  outstr msg_e
 
   .res:
   lda #$00
@@ -160,10 +162,10 @@ msg_init:
   .ascii "nenemark2 pasocon",$0A,$00
 msg_mon:
   .ascii "starting nenemon.",$0A,$00
-msg_ipl:
-  .ascii "starting IPL. send file !",$0A,$00
+msg_e:
+  .ascii "echo mode started.",$0A,$00
 msg_menu:
-  .ascii "n:nenemon i:ipl load",$0A,$00
+  .ascii "n:nenemon e:echo mode",$0A,$00
 msg_lowmem:
   .ascii "KB + ",$00
 msg_highmem:

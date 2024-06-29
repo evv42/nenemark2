@@ -68,17 +68,15 @@ nenetalk_getchar:
   lda #$01
   jsr i2cWrite
   jsr i2cRead
-  jsr i2cAck
-  ;sta IORB
   cmp #$5A
   bne .nope
+  jsr i2cAck
   jsr i2cRead
   sta ATFIN
   jsr i2cNack
   jsr i2cStop
   jmp .end
   .nope:
-  jsr i2cRead
   jsr i2cNack
   jsr i2cStop
   .end:
@@ -266,39 +264,38 @@ screenreset:
   
   ;Font here
 screenfont:
-  ;db $00
   db $FF,$FF,$FF;NUL
-  db $0F,$00,$00
-  db $00,$F0,$0F
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
   db $20,$30,$3C;LF
-  db $00,$00,$00
-  db $00,$00,$00
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
   db $20,$30,$3C;CR
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
-  db $00,$00,$00
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
+  db $FF,$FF,$FF
   db $00,$00,$00;space
   db $00,$5F,$00;!
   db $07,$00,$07;"

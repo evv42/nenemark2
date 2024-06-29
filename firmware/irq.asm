@@ -7,7 +7,6 @@ ATFIN = NENETOP-8
 ATNYA = NENETOP-9
 
 init_at_regs:
-  ;lda #$00
   lda #$76
   sta ATCNT
   rts

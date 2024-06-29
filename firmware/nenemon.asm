@@ -14,7 +14,7 @@ NENEMON_BUFFER = $0200
 NENEMON_INPUT = ATFIN    ;input register
 NENEMON_OUTPUT = char_to_screen ;output function (A = char)
 
-  .org $F000
+;  .org $F000; for easily determining size
 
 nenemon:
 

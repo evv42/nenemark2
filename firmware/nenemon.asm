@@ -1,32 +1,30 @@
 ;nenemark2 monitor
 
 NENEMON_ZP_BASE = $10
-NENEMON_PTRAL = NENEMON_ZP_BASE + 0
+NENEMON_PTRAL = NENEMON_ZP_BASE + 0; pointer a, used by l
 NENEMON_PTRAH = NENEMON_ZP_BASE + 1
-NENEMON_PTRBL = NENEMON_ZP_BASE + 2
+NENEMON_PTRBL = NENEMON_ZP_BASE + 2; pointer b, used by h
 NENEMON_PTRBH = NENEMON_ZP_BASE + 3
 NENEMON_PTRSAV= NENEMON_ZP_BASE + 4
-NENEMON_PTRTL = NENEMON_ZP_BASE + 5
+NENEMON_PTRTL = NENEMON_ZP_BASE + 5; temp pointer
 NENEMON_PTRTH = NENEMON_ZP_BASE + 6
-NENEMON_REG   = NENEMON_ZP_BASE + 7
+NENEMON_REG   = NENEMON_ZP_BASE + 7; whether h has been issued
 NENEMON_BUFFER = $0200
 
 NENEMON_INPUT = ATFIN    ;input register
 NENEMON_OUTPUT = char_to_screen ;output function (A = char)
 
-;  .org $F000; for easily determining size
+  .org $9000; for easily determining size
 
 nenemon:
 
   
   nm_start:
   ldy #$00               ;will use y as buffer pointer
-  lda #':'  
-  jsr NENEMON_OUTPUT     ;output ':'
-  lda #'p'  
-  jsr NENEMON_OUTPUT     ;output 'p'
   lda #$0A  
   jsr NENEMON_OUTPUT     ;output LF
+  lda #'R'  
+  jsr NENEMON_OUTPUT     ;output 'R'
   nm_newinput:
   lda #$00
   sta NENEMON_INPUT
@@ -39,14 +37,15 @@ nenemon:
   nm_handlechar:
   
   cmp #$7F               ;DEL?
-  bne nm_notesc
+  bne nm_notesc          ;skip if not
   
-  dey
-  jsr NENEMON_OUTPUT
+  nm_rubout:
+  dey                    ;go back in buffer
+  jsr NENEMON_OUTPUT     ;go back in screen
   lda #$20
-  jsr NENEMON_OUTPUT
+  jsr NENEMON_OUTPUT     ;clear out char
   lda #$7F
-  bmi nm_out
+  bmi nm_out             ;go back once again
   
   nm_notesc:
   sta NENEMON_BUFFER,y   ;store in buffer
@@ -55,15 +54,14 @@ nenemon:
   jsr NENEMON_OUTPUT     ;output char
   
   cmp #$0A               ;LF ?
-  bne nm_newinput           ;wait for annother char if not
+  bne nm_newinput        ;wait for annother char if not
   
   nm_processbuffer:
   sty NENEMON_PTRSAV
   ldy #$00
   
-  nm_firstpass:; process buffer to only contain 0-F or commands with bit 7 set
+  nm_parse:; process buffer to only contain 0-F or commands with bit 7 set
   lda NENEMON_BUFFER,y
-  ;jsr NENEMON_OUTPUT
   eor #$30               ;flip bits so that 0-9 would appear as such
   cmp #$0A
   bcc .done              ;done if digit
@@ -87,16 +85,14 @@ nenemon:
     sta NENEMON_BUFFER,y
     iny
     cpy NENEMON_PTRSAV
-    bne nm_firstpass
+    bne nm_parse
   
   ldy #$00
   sty NENEMON_REG
   sty NENEMON_PTRTL
   sty NENEMON_PTRTH
-  nm_secondpass:
-  ;lda NENEMON_BUFFER,y
-  ;jsr print_byte
-  ;outchr ' '
+  clv                  ;(maybe useless)for using bvc instead of jmp in the rest of the function
+  nm_process:
   lda NENEMON_BUFFER,y
   bmi .command
   .digit:
@@ -113,7 +109,6 @@ nenemon:
     bne .shiftintoreg
     jmp .done
   .command:
-    clv                  ;(maybe useless)for using bvc instead of jmp in the rest of the function
     and #$0F
     tax
     beq .run;'g'
@@ -143,7 +138,6 @@ nenemon:
     sta NENEMON_PTRAL
     lda NENEMON_PTRTH
     sta NENEMON_PTRAH
-    ;outchr 'A'
     bvc .clean
   .regb:
     inc NENEMON_REG;upper boundary set
@@ -163,7 +157,7 @@ nenemon:
   .done:
     iny
     cpy NENEMON_PTRSAV
-    bne nm_secondpass
+    bne nm_process
   
   nm_display:
     lda NENEMON_PTRAH
@@ -209,8 +203,6 @@ nenemon:
     jsr nm_print_byte
     lda NENEMON_PTRTL
     jsr nm_print_byte
-    lda #':'
-    jsr NENEMON_OUTPUT
     lda #' '
     jsr NENEMON_OUTPUT
     rts

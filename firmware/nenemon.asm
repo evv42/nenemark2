@@ -2,12 +2,12 @@
 
 NENEMON_ZP_BASE = $10
 NENEMON_PTRAL = NENEMON_ZP_BASE + 0; pointer a, used by l
-NENEMON_PTRAH = NENEMON_ZP_BASE + 1
-NENEMON_PTRBL = NENEMON_ZP_BASE + 2; pointer b, used by h
-NENEMON_PTRBH = NENEMON_ZP_BASE + 3
-NENEMON_PTRSAV= NENEMON_ZP_BASE + 4
-NENEMON_PTRTL = NENEMON_ZP_BASE + 5; temp pointer
-NENEMON_PTRTH = NENEMON_ZP_BASE + 6
+NENEMON_PTRBL = NENEMON_ZP_BASE + 1; pointer b, used by h
+NENEMON_PTRTL = NENEMON_ZP_BASE + 2; temp pointer
+NENEMON_PTRAH = NENEMON_ZP_BASE + 3; a high
+NENEMON_PTRBH = NENEMON_ZP_BASE + 4; b high
+NENEMON_PTRTH = NENEMON_ZP_BASE + 5; t high
+NENEMON_PTRSAV= NENEMON_ZP_BASE + 6
 NENEMON_REG   = NENEMON_ZP_BASE + 7; whether h has been issued
 NENEMON_BUFFER = $0200
 
@@ -107,7 +107,7 @@ nenemon:
     rol NENEMON_PTRTH
     dex
     bne .shiftintoreg
-    jmp .done
+    bvc .done
   .command:
     and #$0F
     tax
@@ -134,22 +134,21 @@ nenemon:
     .incend:
     bvc .done
   .rega:
-    lda NENEMON_PTRTL
-    sta NENEMON_PTRAL
-    lda NENEMON_PTRTH
-    sta NENEMON_PTRAH
-    bvc .clean
+    ldx #$00
+    bvc .movereg
   .regb:
-    inc NENEMON_REG;upper boundary set
+    ldx #$01
+    stx NENEMON_REG;upper boundary set
+  .movereg:
     lda NENEMON_PTRTL
-    sta NENEMON_PTRBL
+    sta NENEMON_PTRAL,x
     lda NENEMON_PTRTH
-    sta NENEMON_PTRBH
+    sta NENEMON_PTRAH,x
     bvc .clean
   .write:
     lda NENEMON_PTRTL
     ldx #$00
-    sta (NENEMON_PTRAL,X)
+    sta (NENEMON_PTRAL,x)
   .clean:  
     lda #$00
     sta NENEMON_PTRTH
@@ -169,7 +168,7 @@ nenemon:
     
     ldx #$00
   nm_print_data:
-    lda (NENEMON_PTRTL,X)
+    lda (NENEMON_PTRTL,x)
     jsr nm_print_byte
     lda #' '
     jsr NENEMON_OUTPUT

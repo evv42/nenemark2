@@ -38,7 +38,7 @@ reset:
   tax
   txs
   
-  lda #$03
+  lda #$00
   sta NENEIORS
   sta NENEIO
   

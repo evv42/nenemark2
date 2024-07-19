@@ -245,7 +245,7 @@ clear_screen:
   rts
 
 screeninit:; init code for ssd1306
-  db $A8,$1F
+  db $A8,$3F
   db $D3,$00
   db $40
   db $20,$00
